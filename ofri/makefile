@@ -1,33 +1,16 @@
 CC = gcc
 CFLAGS = -Wall -Werror -std=c11
 
-all: mains maindloop maindrec recursived loopd recursives loops cmp copy basic_shell
-	
-loops: libclassloops.a
-recursives: libclassrec.a
-loopd: libclassrec.so
-recursived: libclassloops.so
+all: codecA codecB cmp copy basic_shell encode decode
 
-mains: libclassrec.a main.o
-	gcc -Wall -g main.o ./libclassrec.a -L. -o mains
+codecB: codecB.so
+codecA: codecA.so
 	
-maindloop: libclassloops.so main.o 
-	gcc -Wall -g main.o ./libclassloops.so -L. -o maindloop
+codecB.so: codecB.o 
+	$(CC) -shared -fPIC -o codecB.so codecB.o
 	
-maindrec: libclassrec.so main.o 
-	gcc -Wall -g main.o ./libclassrec.so -L. -o maindrec
-
-libclassloops.a: basicClassification.o advancedClassificationLoop.o NumClass.h
-	ar -rcs libclassloops.a basicClassification.o advancedClassificationLoop.o 
-	
-libclassrec.a: basicClassification.o advancedClassificationRecursion.o NumClass.h
-	ar -rcs libclassrec.a basicClassification.o advancedClassificationRecursion.o 
-	
-libclassrec.so: basicClassification.o advancedClassificationRecursion.o NumClass.h
-	gcc -shared -fPIC -o libclassrec.so basicClassification.o advancedClassificationRecursion.o
-	
-libclassloops.so: basicClassification.o advancedClassificationLoop.o NumClass.h
-	gcc -shared -fPIC -o libclassloops.so basicClassification.o advancedClassificationLoop.o
+codecA.so: codecA.o 
+	$(CC) -shared -fPIC -o codecA.so codecA.o
 
 cmp: cmp.o
 	$(CC) $(CFLAGS) cmp.o -o cmp
@@ -47,7 +30,19 @@ basic_shell: basic_shell.o
 basic_shell.o: basic_shell.c
 	$(CC) $(CFLAGS) -c basic_shell.c
 
-.PHONY: clean all loops recursives loopd recursived
+encode: encode.o
+	$(CC) $(CFLAGS) encode.o -o encode
+
+encode.o: encode.c
+	$(CC) $(CFLAGS) -c encode.c
+
+decode: decode.o
+	$(CC) $(CFLAGS) decode.o -o decode
+
+decode.o: decode.c
+	$(CC) $(CFLAGS) -c decode.c
+
+.PHONY: clean all codecA codecB
 
 clean: 
-	rm -f *.o *.a *.so mains maindloop maindrec cmp cmp.o basic_shell basic_shell.o copy copy.o
+	rm -f *.o *.a *.so cmp basic_shell copy codecA.so codecB.so encode decode

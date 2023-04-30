@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     size_t len1, len2;
 
     // Parse command line arguments
-    if (argc < 3 || argc > 4) {
+    if (argc < 3 || argc > 5) {
         fprintf(stderr, "Usage: %s <file1> <file2> [-v] [-i]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
         }
     }
     if (argc == 5) {
-        if (strcmp(argv[3], "-v") == 0 && strcmp(argv[4], "-i") == 0) {
+        if ((strcmp(argv[3], "-v") == 0 && strcmp(argv[4], "-i") == 0) ||
+            (strcmp(argv[3], "-i") == 0 && strcmp(argv[4], "-v") == 0)) {
             verbose = 1;
             ignore_case = 1;
         } else if (strcmp(argv[3], "-i") == 0 && strcmp(argv[4], "-v") == 0) {

@@ -1,45 +1,90 @@
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include "stdio.h"
-#include "errno.h"
-#include "stdlib.h"
-#include "unistd.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <signal.h>
+
+#define MAX_COMMAND_LENGTH 1024
+
+// define a signal handler function that does nothing
+void sigint_handler(int signum) {
+    // do nothing
+}
 
 int main()
 {
-	int i;
-	char *argv[10];
-	char command[1024];
-	char *token;
+    char command[MAX_COMMAND_LENGTH];
+    char* argv[MAX_COMMAND_LENGTH / 2 + 1]; // max number of arguments is half of the command length
+    int argc, status;
 
-	while (1)
-	{
-		printf("hello: ");
-		fgets(command, 1024, stdin);
-		command[strlen(command) - 1] = '\0'; // replace \n with \0
+    // register signal handler for SIGINT (Ctrl-C)
+    signal(SIGINT, sigint_handler);
 
-		/* parse command line */
-		i = 0;
-		token = strtok(command, " ");
-		while (token != NULL)
-		{
-			argv[i] = token;
-			token = strtok(NULL, " ");
-			i++;
-		}
-		argv[i] = NULL;
+    while (1)
+    {
+        printf("stshell: ");
+        fflush(stdout);
 
-		/* Is command empty */
-		if (argv[0] == NULL)
-			continue;
+        // read input command
+        if (fgets(command, MAX_COMMAND_LENGTH, stdin) == NULL)
+        {
+            // handle read error
+            fprintf(stderr, "Error reading command\n");
+            continue;
+        }
 
-		/* for commands not part of the shell command language */
-		if (fork() == 0)
-		{
-			execvp(argv[0], argv);
-			wait(NULL);
-		}
-	}
+        // replace newline character with null terminator
+        command[strcspn(command, "\n")] = '\0';
+
+        // check if command is empty
+        if (strlen(command) == 0)
+        {
+            continue;
+        }
+
+        // parse command
+        argc = 0;
+        char* token = strtok(command, " ");
+        while (token != NULL)
+        {
+            argv[argc] = token;
+            argc++;
+            token = strtok(NULL, " ");
+        }
+        argv[argc] = NULL;
+
+        // execute command
+        if (strcmp(argv[0], "exit") == 0)
+        {
+            // exit shell
+            exit(0);
+        }
+        else
+        {
+            // fork child process
+            pid_t pid = fork();
+
+            if (pid == -1)
+            {
+                // handle fork error
+                fprintf(stderr, "Error forking child process\n");
+                continue;
+            }
+            else if (pid == 0)
+            {
+                // execute command in child process
+                execvp(argv[0], argv);
+                fprintf(stderr, "Error executing command\n");
+                exit(1);
+            }
+            else
+            {
+                // wait for child process to finish
+                waitpid(pid, &status, 0);
+            }
+        }
+    }
+
+    return 0;
 }
