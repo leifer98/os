@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Werror -std=c11
+CFLAGS = -Wall
 
 all: codecA codecB cmp copy basic_shell encode decode
 
