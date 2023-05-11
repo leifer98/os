@@ -117,7 +117,7 @@ int server(char *argv[])
     // Calculate and print the elapsed time
     long int elapsed_time = (end_time.tv_sec - start_time.tv_sec) * 1000 +
                             (end_time.tv_usec - start_time.tv_usec) / 1000;
-    printf("UDS dgram milliseconds ??? : %ld\n", elapsed_time);
+    printf("uds_dgram, %ld\n", elapsed_time);
 
     // Close the file and socket
 
