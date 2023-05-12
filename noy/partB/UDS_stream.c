@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <fcntl.h>
+#include <openssl/evp.h>
 
 #define SOCK_PATH "/tmp/uds_socket"
 #define BUFFER_SIZE 1024
@@ -17,6 +18,9 @@ int client(char *argv[])
 {
     int sock, read_size, valread;
     char buffer[65536] = {0};
+    EVP_MD_CTX *mdctx;
+    unsigned char md_value[EVP_MAX_MD_SIZE];
+    unsigned int md_len;
 
     // Open file
     int fd = open("send.txt", O_RDONLY);
@@ -42,11 +46,19 @@ int client(char *argv[])
         perror("connect");
         return -1;
     }
-
+    // Initialize OpenSSL
+    OpenSSL_add_all_digests();
+    mdctx = EVP_MD_CTX_new();
+    EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL);
     // Send the file to the server
     int read_bytes;
     while ((read_bytes = read(fd, buffer, sizeof(buffer))) > 0)
     {
+        if (EVP_DigestUpdate(mdctx, buffer, read_bytes) != 1)
+        {
+            perror("EVP_DigestUpdate");
+            return -1;
+        }
         if (send(sock, buffer, read_bytes, 0) == 1)
         {
             printf("\nError while sending data to server \n");
@@ -56,12 +68,20 @@ int client(char *argv[])
         }
     }
     printf("File sent\n");
-    // // Send message to the server
-    // if (send(sock, buffer, strlen(buffer), 0) == -1)
-    // {
-    //     perror("send");
-    //     return -1;
-    // }
+    EVP_DigestFinal_ex(mdctx, md_value, &md_len);
+    EVP_MD_CTX_free(mdctx);
+
+    // Send the checksum to the server
+    if (send(sock, md_value, md_len, 0) == -1)
+    {
+        printf("\nError while sending checksum to server \n");
+        close(fd);
+        close(sock);
+        return -1;
+    }
+
+    printf("Checksum sent\n");
+
     close(fd);
     close(sock);
 }
@@ -69,8 +89,8 @@ int client(char *argv[])
 int server(char *argv[])
 {
     int sock, conn, read_size, valread;
-    char buffer[65536] = {0};
     unlink(SOCK_PATH);
+    unsigned char buffer[EVP_MAX_MD_SIZE] = {0};
     // Create socket
     if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
     {
@@ -114,10 +134,11 @@ int server(char *argv[])
     int total_read = 0;
     struct timeval start_time, end_time;
     gettimeofday(&start_time, NULL);
-
+    // Read the incoming checksum from the client
+    printf("Read incoming checksum\n");
     while (total_read < 100662273)
     { // loop until 100 MB of data is read
-        valread = recv(conn, buffer, sizeof(buffer), 0);
+        valread = recv(conn, buffer, EVP_MAX_MD_SIZE, 0);
         if (valread < 0)
         {
             perror("read failed");
@@ -128,6 +149,13 @@ int server(char *argv[])
     }
     printf("File received successfully\n");
     gettimeofday(&end_time, NULL);
+     // Print the checksum
+    printf("Received checksum: ");
+    for (int i = 0; i < valread; i++)
+    {
+        printf("%02x", buffer[i]);
+    }
+    printf("\n");
 
     // Calculate and print the elapsed time
     long int elapsed_time = (end_time.tv_sec - start_time.tv_sec) * 1000 +
@@ -137,6 +165,8 @@ int server(char *argv[])
     // Close the file and socket
     close(conn);
     close(sock);
+    printf("Checksum received successfully\n");
+    return 0;
 }
 int main(int count, char *argv[])
 {
