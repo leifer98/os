@@ -139,16 +139,28 @@ int server(char *argv[])
         if (strcmp(param, "tcp") == 0)
         {
             printf("You have chosen %s with %s.\n", type, param);
-            tcp4_server(argv);
-            sleep(2);
-            tcp4_client(argv);
+            if (strcmp(argv[5], "-q") == 0)
+            {
+                tcp4_server(argv);
+            }
+            else
+            {
+                sleep(2);
+                tcp4_client(argv);
+            }
         }
         else if (strcmp(param, "udp") == 0)
         {
             printf("You have chosen %s with %s.\n", type, param);
-            udp4_server(argv);
-            sleep(2);
-            udp4_client(argv);
+            if (strcmp(argv[5], "-q") == 0)
+            {
+                udp4_server(argv);
+            }
+            else
+            {
+                sleep(2);
+                udp4_client(argv);
+            }
         }
     }
     else if (strcmp(type, "ipv6") == 0)
@@ -156,16 +168,28 @@ int server(char *argv[])
         if (strcmp(param, "tcp") == 0)
         {
             printf("You have chosen %s with %s.\n", type, param);
-            tcp6_server(argv);
-            sleep(2);
-            tcp6_client(argv);
+            if (strcmp(argv[5], "-q") == 0)
+            {
+                tcp6_server(argv);
+            }
+            else
+            {
+                sleep(2);
+                tcp6_client(argv);
+            }
         }
         else if (strcmp(param, "udp") == 0)
         {
             printf("You have chosen %s with %s.\n", type, param);
-            udp6_server(argv);
-            sleep(2);
-            udp6_client(argv);
+            if (strcmp(argv[5], "-q") == 0)
+            {
+                udp6_server(argv);
+            }
+            else
+            {
+                sleep(2);
+                udp6_client(argv);
+            }
         }
     }
     else if (strcmp(type, "uds") == 0)
@@ -173,31 +197,55 @@ int server(char *argv[])
         if (strcmp(param, "stream") == 0)
         {
             printf("You have chosen %s with %s.\n", type, param);
-            udss_server(argv);
-            sleep(2);
-            udss_client(argv);
+            if (strcmp(argv[5], "-q") == 0)
+            {
+                udss_server(argv);
+            }
+            else
+            {
+                sleep(2);
+                udss_client(argv);
+            }
         }
         else if (strcmp(param, "dgram") == 0)
         {
             printf("You have chosen %s with %s.\n", type, param);
-            udsd_server(argv);
-            sleep(2);
-            udsd_client(argv);
+            if (strcmp(argv[5], "-q") == 0)
+            {
+                udsd_server(argv);
+            }
+            else
+            {
+                sleep(2);
+                udsd_client(argv);
+            }
         }
     }
     else if (strcmp(type, "mmap") == 0)
     {
         printf("You have chosen %s with file name: %s.\n", type, param);
-        mmap_server(argv);
-        sleep(2);
-        mmap_client(argv);
+        if (strcmp(argv[5], "-q") == 0)
+        {
+            mmap_server(argv);
+        }
+        else
+        {
+            sleep(2);
+            mmap_client(argv);
+        }
     }
     else if (strcmp(type, "pipe") == 0)
     {
         printf("You have chosen %s with file name: %s.\n", type, param);
-        pipe_server(argv);
-        sleep(2);
-        pipe_client(argv);
+        if (strcmp(argv[5], "-q") == 0)
+        {
+            pipe_server(argv);
+        }
+        else
+        {
+            sleep(2);
+            pipe_client(argv);
+        }
     }
     else
     {
