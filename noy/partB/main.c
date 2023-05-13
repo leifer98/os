@@ -23,9 +23,6 @@
 #define PORT 8080
 #define LOCALHOST "127.0.0.1"
 
-void activate()
-{
-}
 int client(char *argv[])
 {
     char *ip = argv[2];
@@ -136,6 +133,78 @@ int server(char *argv[])
     char *port = strtok(NULL, " ");
     char *type = strtok(NULL, " ");
     char *param = strtok(NULL, " ");
+
+    if (strcmp(type, "ipv4") == 0)
+    {
+        if (strcmp(param, "tcp") == 0)
+        {
+            printf("You have chosen %s with %s.\n", type, param);
+            tcp4_server(argv);
+            sleep(2);
+            tcp4_client(argv);
+        }
+        else if (strcmp(param, "udp") == 0)
+        {
+            printf("You have chosen %s with %s.\n", type, param);
+            udp4_server(argv);
+            sleep(2);
+            udp4_client(argv);
+        }
+    }
+    else if (strcmp(type, "ipv6") == 0)
+    {
+        if (strcmp(param, "tcp") == 0)
+        {
+            printf("You have chosen %s with %s.\n", type, param);
+            tcp6_server(argv);
+            sleep(2);
+            tcp6_client(argv);
+        }
+        else if (strcmp(param, "udp") == 0)
+        {
+            printf("You have chosen %s with %s.\n", type, param);
+            udp6_server(argv);
+            sleep(2);
+            udp6_client(argv);
+        }
+    }
+    else if (strcmp(type, "uds") == 0)
+    {
+        if (strcmp(param, "stream") == 0)
+        {
+            printf("You have chosen %s with %s.\n", type, param);
+            udss_server(argv);
+            sleep(2);
+            udss_client(argv);
+        }
+        else if (strcmp(param, "dgram") == 0)
+        {
+            printf("You have chosen %s with %s.\n", type, param);
+            udsd_server(argv);
+            sleep(2);
+            udsd_client(argv);
+        }
+    }
+    else if (strcmp(type, "mmap") == 0)
+    {
+        printf("You have chosen %s with file name: %s.\n", type, param);
+        mmap_server(argv);
+        sleep(2);
+        mmap_client(argv);
+    }
+    else if (strcmp(type, "pipe") == 0)
+    {
+        printf("You have chosen %s with file name: %s.\n", type, param);
+        pipe_server(argv);
+        sleep(2);
+        pipe_client(argv);
+    }
+    else
+    {
+        printf("Incorrect type. Please choose from ipv4, ipv6, mmap, pipe, uds.\n");
+        return 1;
+    }
+
     // Close the file and socket
     close(new_socket);
     close(server_fd);
