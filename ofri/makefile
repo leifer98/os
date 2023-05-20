@@ -11,7 +11,7 @@ LDFLAGS = -shared
 SOURCES = server.cpp client.cpp
 
 # Output executables
-SERVER_OUT = server
+SERVER_OUT = react_server
 CLIENT_OUT = client
 LIB_OUT = libreactor.so
 
