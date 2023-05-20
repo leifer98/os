@@ -1,48 +1,30 @@
-CC = gcc
-CFLAGS = -Wall
+# Compiler to use
+CC = clang++-14
 
-all: codecA codecB cmp copy basic_shell encode decode
+# Compiler flags
+CFLAGS = -pthread -std=c++14
 
-codecB: codecB.so
-codecA: codecA.so
-	
-codecB.so: codecB.o 
-	$(CC) -shared -fPIC -o codecB.so codecB.o
-	
-codecA.so: codecA.o 
-	$(CC) -shared -fPIC -o codecA.so codecA.o
+# Shared Library flags
+LDFLAGS = -shared
 
-cmp: cmp.o
-	$(CC) $(CFLAGS) cmp.o -o cmp
+# List of source files
+SOURCES = server.cpp client.cpp
 
-cmp.o: cmp.c
-	$(CC) $(CFLAGS) -c cmp.c
+# Output executables
+SERVER_OUT = server
+CLIENT_OUT = client
+LIB_OUT = libreactor.so
 
-copy: copy.o
-	$(CC) $(CFLAGS) copy.o -o copy
+all: $(SERVER_OUT) $(CLIENT_OUT) $(LIB_OUT)
 
-copy.o: copy.c
-	$(CC) $(CFLAGS) -c copy.c
-	
-basic_shell: basic_shell.o
-	$(CC) $(CFLAGS) basic_shell.o -o basic_shell
+$(SERVER_OUT): server.cpp
+	$(CC) $(CFLAGS) -o $(SERVER_OUT) server.cpp -ldl
 
-basic_shell.o: basic_shell.c
-	$(CC) $(CFLAGS) -c basic_shell.c
+$(CLIENT_OUT): client.cpp
+	$(CC) $(CFLAGS) -o $(CLIENT_OUT) client.cpp
 
-encode: encode.o
-	$(CC) $(CFLAGS) encode.o -o encode
+$(LIB_OUT): reactor.cpp
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LIB_OUT) reactor.cpp
 
-encode.o: encode.c
-	$(CC) $(CFLAGS) -c encode.c
-
-decode: decode.o
-	$(CC) $(CFLAGS) decode.o -o decode
-
-decode.o: decode.c
-	$(CC) $(CFLAGS) -c decode.c
-
-.PHONY: clean all codecA codecB
-
-clean: 
-	rm -f *.o *.a *.so cmp basic_shell copy codecA.so codecB.so encode decode
+clean:
+	rm -f $(SERVER_OUT) $(CLIENT_OUT) $(LIB_OUT)
