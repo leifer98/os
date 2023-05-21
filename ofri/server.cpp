@@ -104,19 +104,19 @@ int main()
             std::cout << buf << '\n';
 
             // Send the received message to all clients except the originating client.
-            for (const auto &p : reactor.getFDHandlers())
-            {
-                int other_client_fd = p.first;
-                if (other_client_fd != server_fd && other_client_fd != client_fd)
-                {
-                    if (send(other_client_fd, buf, nbytes, 0) == -1)
-                    {
-                        perror("send");
-                        close(other_client_fd);
-                        // Here you'd also want to remove the fd from the reactor.
-                    }
-                }
-            }
+            // for (const auto &p : reactor.getFDHandlers())
+            // {
+            //     int other_client_fd = p.first;
+            //     if (other_client_fd != server_fd && other_client_fd != client_fd)
+            //     {
+            //         if (send(other_client_fd, buf, nbytes, 0) == -1)
+            //         {
+            //             // perror("send");
+            //             close(other_client_fd);
+            //             // Here you'd also want to remove the fd from the reactor.
+            //         }
+            //     }
+            // }
         });
     });
 
