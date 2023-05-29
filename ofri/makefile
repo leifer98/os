@@ -1,26 +1,22 @@
-# Compiler to use
-CC = clang++-14
+CXX = clang++-14
+CXXFLAGS = -std=c++14 -Wall -pedantic -pthread
 
-# Compiler flags
-CFLAGS = -pthread -std=c++14
+all: st_pipeline
 
-# Shared Library flags
-LDFLAGS = -shared
+st_pipeline: st_pipeline.o active_object.o safe_queue.o prime.o
+	$(CXX) $(CXXFLAGS) -o st_pipeline st_pipeline.o active_object.o safe_queue.o prime.o
 
-# List of source files
-SOURCES = server.cpp 
+st_pipeline.o: st_pipeline.cpp active_object.hpp prime.cpp safe_queue.hpp
+	$(CXX) $(CXXFLAGS) -c st_pipeline.cpp
 
-# Output executables
-SERVER_OUT = react_server
-LIB_OUT = libreactor.so
+active_object.o: active_object.cpp active_object.hpp safe_queue.hpp
+	$(CXX) $(CXXFLAGS) -c active_object.cpp
 
-all: $(SERVER_OUT) $(CLIENT_OUT) $(LIB_OUT)
+safe_queue.o: safe_queue.cpp safe_queue.hpp
+	$(CXX) $(CXXFLAGS) -c safe_queue.cpp
 
-$(SERVER_OUT): server.cpp
-	$(CC) $(CFLAGS) -o $(SERVER_OUT) server.cpp -ldl
-
-$(LIB_OUT): reactor.cpp
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LIB_OUT) reactor.cpp
+prime.o: prime.cpp
+	$(CXX) $(CXXFLAGS) -c prime.cpp
 
 clean:
-	rm -f $(SERVER_OUT) $(LIB_OUT)
+	rm -f st_pipeline *.o
