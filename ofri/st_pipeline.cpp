@@ -7,8 +7,6 @@
 #include "prime.cpp"
 #include "safe_queue.hpp"
 
-#define N 1
-
 using namespace std;
 
 std::shared_ptr<ActiveObject> AO1;
@@ -18,28 +16,14 @@ std::shared_ptr<ActiveObject> AO4;
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2 || argc > 3)
+    if (argc < 3 || argc > 3)
     {
         std::cerr << "Usage: " << argv[0] << " N [SEED]" << std::endl;
         return 1;
     }
-    unsigned int seed = argc == 3 ? std::atoi(argv[2]) : std::time(nullptr);
-
-    // cout << isPrime(5) << endl;
-    // cout << isPrime(15) << endl;
-    // cout << isPrime(50) << endl;
-
-    // int a = 5;
-    // int b = 51;
-    // int c = 15;
-
-    // SafeQueue queue;
-    // queue.enqueue(&a);
-    // queue.enqueue(&b);
-    // queue.enqueue(&c);
-    // cout << *((int *)(queue.dequeue())) << endl;
-    // cout << *((int *)(queue.dequeue())) << endl;
-    // cout << *((int *)(queue.dequeue())) << endl;
+    int seed = std::atoi(argv[2]);
+    int repeats = std::atoi(argv[1]);
+    int tuple[] = {seed, repeats};
 
     AO1 = std::make_shared<ActiveObject>();
     AO2 = std::make_shared<ActiveObject>();
@@ -48,9 +32,11 @@ int main(int argc, char *argv[])
 
     AO1->setTask([](void *data)
                  {
-                    std::srand(*(int*)data);
-        std::cout << *(int*)data << std::endl;
-                     for (int i = 0 ; i < N ; i++) {
+                    int repeats = *((int*)data + 1);
+                    int seed = *(int*)data;
+
+                    std::srand(seed);
+                     for (int i = 0 ; i < repeats ; i++) {
                         int num = std::rand() % 900000 + 100000; // Generate 6-digit number
                         std::this_thread::sleep_for(std::chrono::milliseconds(1));
                         AO2->getQueue()->enqueue(new int(num));
@@ -81,7 +67,7 @@ int main(int argc, char *argv[])
         delete (int*)data; });
 
     // Start the AOs
-    AO1->getQueue()->enqueue(&seed);
+    AO1->getQueue()->enqueue(&tuple);
     AO1->start();
     AO2->start();
     AO3->start();
